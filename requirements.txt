@@ -4,4 +4,5 @@ langchain
 langchain-community
 langchain-google-genai
 langchain-huggingface
+sentence-transformers
 chromadb
