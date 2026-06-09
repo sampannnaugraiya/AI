@@ -1,23 +1,19 @@
 import os
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-# NOTE: No hardcoded keys. Streamlit will find GOOGLE_API_KEY in Secrets!
-
 def get_vector_store(pdf_path):
-    # Pure Python PDF text reader. No graphics, no cv2, no errors.
+    # Pure Python PDF reader
     loader = PyPDFLoader(pdf_path)
     docs = loader.load()
     
-    # Split the documents into manageable chunks
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     splits = splitter.split_documents(docs)
     
-    # Generate embeddings and save to the vector database
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    # Cloud-based embeddings! No local torch, no local packages, no crashing.
+    embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-2-preview")
     return Chroma.from_documents(splits, embeddings)
 
 def get_answer(vector_store, query):
