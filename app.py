@@ -1,3 +1,11 @@
+import streamlit as st
+
+try:
+    import google.genai as genai
+    st.write("Google GenAI imported successfully")
+except Exception as e:
+    st.error(f"Import failed: {e}")
+    
 import os
 import tempfile
 
