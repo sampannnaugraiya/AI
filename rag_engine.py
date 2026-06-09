@@ -33,9 +33,11 @@ def get_answer(vector_store, query):
         )
 
     client = genai.Client(
-        api_key=api_key,
-        http_options=HttpOptions(
-            api_version="v1"
+    api_key=api_key,
+    http_options=types.HttpOptions(
+        api_version="v1"
+    )
+)
         )
     )
 
