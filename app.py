@@ -10,13 +10,14 @@ st.set_page_config(
 )
 
 st.title("📚 AI Tutor Dashboard")
+st.write("Upload a PDF and ask questions about it.")
 
 uploaded_file = st.file_uploader(
     "Upload PDF",
     type=["pdf"]
 )
 
-if uploaded_file:
+if uploaded_file is not None:
 
     with tempfile.NamedTemporaryFile(
         delete=False,
@@ -30,6 +31,15 @@ if uploaded_file:
         vector_store = get_vector_store(temp_path)
 
         st.success("PDF processed successfully!")
+
+        # Debug preview of extracted text
+        st.write("Pages extracted:", len(vector_store))
+
+        st.text_area(
+            "Preview of extracted text",
+            "\n\n".join(vector_store[:2]),
+            height=300
+        )
 
         user_query = st.text_input(
             "Ask a question about the PDF"
