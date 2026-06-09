@@ -11,6 +11,7 @@ def get_vector_store(pdf_path):
 
     for page in reader.pages:
         text = page.extract_text()
+
         if text:
             text_parts.append(text)
 
@@ -31,6 +32,9 @@ def get_answer(vector_store, query):
     )
 
     document_text = "\n\n".join(vector_store)
+
+    # Prevent huge PDFs from overflowing context
+    document_text = document_text[:50000]
 
     prompt = f"""
 You are an expert AI tutor and study assistant.
