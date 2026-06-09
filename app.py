@@ -1,9 +1,3 @@
-import os
-os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
-
-import streamlit as st
-from rag_engine import get_vector_store, get_answer
-# ... the rest of your app.py code stays exactly the same ...
 import streamlit as st
 import os
 from rag_engine import get_vector_store, get_answer
@@ -22,20 +16,20 @@ if uploaded_file is not None:
     with open(temp_filename, "wb") as f:
         f.write(uploaded_file.getbuffer())
     
-    # Process the vector store using Google Cloud Embeddings
+    # Process the PDF using native Python text extraction
     if "vector_store" not in st.session_state:
-        with st.spinner("Processing PDF on the cloud... Hang tight!"):
+        with st.spinner("Processing PDF cleanly... Hang tight!"):
             try:
                 st.session_state.vector_store = get_vector_store(temp_filename)
                 st.success("PDF processed successfully!")
             except Exception as e:
-                st.error(f"Failed to process vector store: {e}")
+                st.error(f"Failed to process document: {e}")
                 
     # Clean up the temporary file from the disk after loading
     if os.path.exists(temp_filename):
         os.remove(temp_filename)
 
-    # 2. Chat Interface (Only displays if the vector store is ready)
+    # 2. Chat Interface (Only displays if the text data is ready in memory)
     if "vector_store" in st.session_state:
         st.write("---")
         user_query = st.text_input("Ask a question about your document:")
@@ -43,6 +37,7 @@ if uploaded_file is not None:
         if user_query:
             with st.spinner("Gemini is thinking..."):
                 try:
+                    # Pass the text list and question straight to Google
                     answer = get_answer(st.session_state.vector_store, user_query)
                     st.markdown(f"### 🤖 Answer:\n{answer}")
                 except Exception as e:
