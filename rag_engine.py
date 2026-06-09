@@ -3,7 +3,6 @@ import google.genai as genai
 from google.genai import types
 from pypdf import PdfReader
 
-
 def get_vector_store(pdf_path):
     """
     Extract text from PDF pages.
@@ -19,11 +18,7 @@ def get_vector_store(pdf_path):
 
     return text_chunks
 
-
 def get_answer(vector_store, query):
-    """
-    Query Gemini using the production v1 API.
-    """
 
     api_key = os.getenv("GOOGLE_API_KEY")
 
@@ -33,11 +28,9 @@ def get_answer(vector_store, query):
         )
 
     client = genai.Client(
-    api_key=api_key,
-    http_options=types.HttpOptions(
-        api_version="v1"
-    )
-)
+        api_key=api_key,
+        http_options=types.HttpOptions(
+            api_version="v1"
         )
     )
 
@@ -63,3 +56,5 @@ ANSWER:
     )
 
     return response.text
+
+  
