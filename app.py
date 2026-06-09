@@ -1,20 +1,8 @@
-import streamlit as st
-
-try:
-    import google.genai as genai
-    st.write("Google GenAI imported successfully")
-except Exception as e:
-    st.error(f"Import failed: {e}")
-    
 import os
 import tempfile
-
 import streamlit as st
 
-from rag_engine import (
-    get_vector_store,
-    get_answer,
-)
+from rag_engine import get_vector_store, get_answer
 
 st.set_page_config(
     page_title="AI Tutor Dashboard",
@@ -22,62 +10,46 @@ st.set_page_config(
 )
 
 st.title("📚 AI Tutor Dashboard")
-st.write("Upload a PDF and ask questions about it.")
-
-if "vector_store" not in st.session_state:
-    st.session_state.vector_store = None
 
 uploaded_file = st.file_uploader(
     "Upload PDF",
     type=["pdf"]
 )
 
-if uploaded_file is not None:
+if uploaded_file:
 
     with tempfile.NamedTemporaryFile(
         delete=False,
         suffix=".pdf"
-    ) as tmp_file:
+    ) as temp_file:
 
-        tmp_file.write(uploaded_file.getbuffer())
-        temp_path = tmp_file.name
+        temp_file.write(uploaded_file.getbuffer())
+        temp_path = temp_file.name
 
     try:
-        with st.spinner("Processing PDF..."):
-
-            st.session_state.vector_store = get_vector_store(
-                temp_path
-            )
+        vector_store = get_vector_store(temp_path)
 
         st.success("PDF processed successfully!")
 
-    except Exception as e:
-        st.error(f"PDF processing failed: {e}")
+        user_query = st.text_input(
+            "Ask a question about the PDF"
+        )
 
-    finally:
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+        if user_query:
 
-if st.session_state.vector_store:
-
-    st.divider()
-
-    user_query = st.text_input(
-        "Ask a question about your document"
-    )
-
-    if user_query:
-
-        try:
-            with st.spinner("Generating answer..."):
+            with st.spinner("Thinking..."):
 
                 answer = get_answer(
-                    st.session_state.vector_store,
+                    vector_store,
                     user_query
                 )
 
             st.markdown("### 🤖 Answer")
             st.write(answer)
 
-        except Exception as e:
-            st.error(f"Error: {e}")
+    except Exception as e:
+        st.error(str(e))
+
+    finally:
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
