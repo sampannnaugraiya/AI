@@ -1,24 +1,43 @@
 import streamlit as st
+import os
 from rag_engine import get_vector_store, get_answer
 
-st.title("AI Tutor Dashboard")
-pdf = st.file_uploader("Upload your PDF", type="pdf")
+# Set up clean page configuration
+st.set_page_config(page_title="AI Tutor Dashboard", layout="centered")
+st.title("📚 AI Tutor Dashboard")
+st.write("Upload a PDF and ask questions directly to Gemini without any server lag.")
 
-# Cache the vector store so it doesn't re-run every time you ask a question
-@st.cache_resource
-def load_vector_store(file_path):
-    return get_vector_store(file_path)
+# 1. File Upload Box
+uploaded_file = st.file_uploader("Upload your PDF document", type=["pdf"])
 
-if pdf:
-    # Save file
-    with open("temp.pdf", "wb") as f:
-        f.write(pdf.getbuffer())
+if uploaded_file is not None:
+    # Save the uploaded file temporarily to pass to our engine
+    temp_filename = "temp_uploaded_doc.pdf"
+    with open(temp_filename, "wb") as f:
+        f.write(uploaded_file.getbuffer())
     
-    # Load once and store in session
-    vs = load_vector_store("temp.pdf")
-    
-    query = st.text_input("Ask a question:")
-    if query:
-        with st.spinner("Analyzing..."): # Added a spinner for better UX
-            response = get_answer(vs, query)
-            st.write(response)
+    # Process the vector store using Google Cloud Embeddings
+    if "vector_store" not in st.session_state:
+        with st.spinner("Processing PDF on the cloud... Hang tight!"):
+            try:
+                st.session_state.vector_store = get_vector_store(temp_filename)
+                st.success("PDF processed successfully!")
+            except Exception as e:
+                st.error(f"Failed to process vector store: {e}")
+                
+    # Clean up the temporary file from the disk after loading
+    if os.path.exists(temp_filename):
+        os.remove(temp_filename)
+
+    # 2. Chat Interface (Only displays if the vector store is ready)
+    if "vector_store" in st.session_state:
+        st.write("---")
+        user_query = st.text_input("Ask a question about your document:")
+        
+        if user_query:
+            with st.spinner("Gemini is thinking..."):
+                try:
+                    answer = get_answer(st.session_state.vector_store, user_query)
+                    st.markdown(f"### 🤖 Answer:\n{answer}")
+                except Exception as e:
+                    st.error(f"Error fetching answer: {e}")
