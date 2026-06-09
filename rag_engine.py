@@ -14,9 +14,9 @@ def get_vector_store(pdf_path):
     # Pure Python memory storage. No databases, 100% crash-proof.
     embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-2-preview")
     return InMemoryVectorStore.from_documents(splits, embeddings)
-
 def get_answer(vector_store, query):
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+    # Added '-latest' to force LangChain to skip the broken v1beta endpoint mapping
+    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest")
     docs = vector_store.similarity_search(query, k=8)
     context = "\n\n".join([d.page_content for d in docs])
     
