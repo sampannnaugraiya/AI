@@ -1,3 +1,9 @@
+import os
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+
+import streamlit as st
+from rag_engine import get_vector_store, get_answer
+# ... the rest of your app.py code stays exactly the same ...
 import streamlit as st
 import os
 from rag_engine import get_vector_store, get_answer
