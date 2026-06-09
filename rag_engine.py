@@ -1,6 +1,6 @@
 import os
 import google.genai as genai
-from google.genai.types import HttpOptions
+from google.genai import types
 from pypdf import PdfReader
 
 
