@@ -1,7 +1,7 @@
 import os
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain_community.vectorstores import Chroma
+from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 def get_vector_store(pdf_path):
@@ -12,9 +12,9 @@ def get_vector_store(pdf_path):
     splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     splits = splitter.split_documents(docs)
     
-    # Cloud-based embeddings! No local torch, no local packages, no crashing.
+    # Cloud-based embeddings combined with a pure-Python vector directory
     embeddings = GoogleGenerativeAIEmbeddings(model="gemini-embedding-2-preview")
-    return Chroma.from_documents(splits, embeddings)
+    return FAISS.from_documents(splits, embeddings)
 
 def get_answer(vector_store, query):
     llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
